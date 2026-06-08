@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漢語拼音互動實驗室</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: Arial, "Helvetica Neue", Helvetica, sans-serif; background-color: #f8fafc; color: #334155; }
+        .pinyin-display { font-family: Arial, sans-serif; }
+        .neumorphic-card { background: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .dev-panel { position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; color: white; padding: 20px; z-index: 1000; max-height: 40vh; overflow-y: auto; font-family: monospace; border-top: 4px solid #f59e0b; box-shadow: 0 -10px 25px rgba(0,0,0,0.3); }
+        .marker-active { background: #f59e0b !important; color: #000 !important; font-weight: bold; border-color: white !important; transform: scale(1.05); }
+        .marker-done { opacity: 0.4; background: #334155; }
+        /* 強化行動端 iframe 的適應性 */
+        .iframe-container { width: 100%; height: 75vh; min-height: 500px; max-height: 750px; border: none; border-radius: 16px; overflow: hidden; }
+        /* 移除手機端點擊高亮藍色陰影 */
+        button, div { -webkit-tap-highlight-color: transparent; }
+    </style>
+</head>
+<body class="p-3 sm:p-6">
+    <div id="app" class="max-w-4xl mx-auto pb-32">
+        
+        <audio ref="audioPlayer" src="pinyin_elements.mp3" preload="auto" class="hidden"></audio>
+
+        <header class="space-y-6 mb-6">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                <div class="space-y-2">
+                    <button @click="toggleFullAudio" :class="isFullPlaying ? 'bg-amber-600 hover:bg-amber-700' : 'bg-slate-700 hover:bg-slate-800'" class="w-full md:w-auto text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-colors flex items-center justify-center gap-2 active:scale-98">
+                        <span>{{ isFullPlaying ? '⏸️ 暫停完整音頻' : '▶️ 播放完整聲韻母音頻' }}</span>
+                    </button>
+                    <div class="text-[11px] text-slate-400 leading-relaxed font-medium pl-1">
+                        <p>錄音僅供參考。網頁僅供機構內部使用。</p>
+                        <p>© 普通話水平測試中心版權所有。</p>
+                    </div>
+                </div>
+                
+                <div class="flex rounded-xl bg-slate-200/70 p-1 w-full md:w-auto shadow-inner">
+                    <button @click="currentTab = 'initial'" :class="currentTab === 'initial' ? 'bg-white text-emerald-800 font-extrabold shadow-md' : 'text-slate-600'" class="flex-1 md:flex-none md:px-8 py-2.5 text-sm sm:text-base rounded-lg transition-all active:scale-95">
+                        基礎聲母 (23)
+                    </button>
+                    <button @click="currentTab = 'final'" :class="currentTab === 'final' ? 'bg-white text-blue-800 font-extrabold shadow-md' : 'text-slate-600'" class="flex-1 md:flex-none md:px-8 py-2.5 text-sm sm:text-base rounded-lg transition-all active:scale-95">
+                        韻母 (39)
+                    </button>
+                </div>
+            </div>
+
+            <h1 class="text-center text-3xl sm:text-4xl font-extrabold text-slate-800 tracking-wider py-2">漢語拼音互動實驗室</h1>
+
+            <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2 text-center">
+                    <button @click="goToCombination('bpmf')" :class="currentTab === 'bpmf' ? 'bg-orange-500 text-white font-bold shadow' : 'bg-slate-50 text-slate-600'" class="py-2 text-xs sm:text-sm font-semibold rounded-lg hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">bpmf 拼讀</button>
+                    <button @click="goToCombination('dtnl')" :class="currentTab === 'dtnl' ? 'bg-orange-500 text-white font-bold shadow' : 'bg-slate-50 text-slate-600'" class="py-2 text-xs sm:text-sm font-semibold rounded-lg hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">dtnl 拼讀</button>
+                    <button @click="goToCombination('gkh')" :class="currentTab === 'gkh' ? 'bg-orange-500 text-white font-bold shadow' : 'bg-slate-50 text-slate-600'" class="py-2 text-xs sm:text-sm font-semibold rounded-lg hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">gkh 拼讀</button>
+                    <button @click="goToCombination('jqx')" :class="currentTab === 'jqx' ? 'bg-orange-500 text-white font-bold shadow' : 'bg-slate-50 text-slate-600'" class="py-2 text-xs sm:text-sm font-semibold rounded-lg hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">jqx 拼讀</button>
+                    <button @click="goToCombination('zhchshr')" :class="currentTab === 'zhchshr' ? 'bg-orange-500 text-white font-bold shadow' : 'bg-slate-50 text-slate-600'" class="py-2 text-xs sm:text-sm font-semibold rounded-lg hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">翹舌音拼讀</button>
+                    <button @click="goToCombination('zcs')" :class="currentTab === 'zcs' ? 'bg-orange-500 text-white font-bold shadow' : 'bg-slate-50 text-slate-600'" class="py-2 text-xs sm:text-sm font-semibold rounded-lg hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">平舌音拼讀</button>
+                    <button @click="goToCombination('yw')" :class="currentTab === 'yw' ? 'bg-orange-500 text-white font-bold shadow' : 'bg-slate-50 text-slate-600'" class="py-2 text-xs sm:text-sm font-semibold rounded-lg hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">零聲母/yw</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="space-y-6">
+            <div v-if="['bpmf','dtnl','gkh','jqx','zhchshr','zcs','yw'].includes(currentTab)" class="neumorphic-card border border-orange-100 overflow-hidden">
+                <iframe :src="currentIframeUrl" class="iframe-container" scrolling="auto"></iframe>
+            </div>
+
+            <div v-if="currentTab === 'initial'" class="neumorphic-card p-4 sm:p-6 border border-emerald-100">
+                <h2 class="text-sm sm:text-base font-bold text-emerald-700 mb-4 flex items-center">
+                    <span class="mr-2">🟢</span> 點擊聲母聽發音 (共 23 個)
+                </h2>
+                <div v-for="(group, name) in initialsData" :key="name" class="mb-6 last:mb-0">
+                    <p class="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider pl-1">{{ name }}</p>
+                    <div class="grid grid-cols-4 sm:grid-cols-6 gap-2.5 sm:gap-4">
+                        <button v-for="s in group" :key="s" 
+                                @click="playSound(s)"
+                                class="py-3 sm:py-4 rounded-xl border bg-slate-50 text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-300 transition-all font-bold text-xl sm:text-2xl pinyin-display shadow-sm active:scale-90">
+                            {{ s }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="currentTab === 'final'" class="neumorphic-card p-4 sm:p-6 border border-blue-100">
+                <h2 class="text-sm sm:text-base font-bold text-blue-700 mb-4 flex items-center">
+                    <span class="mr-2">🔵</span> 點擊韻母聽發音 (共 39 個)
+                </h2>
+                <div v-for="(group, name) in finalsData" :key="name" class="mb-6 last:mb-0">
+                    <p class="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider pl-1">{{ name }}</p>
+                    <div class="grid grid-cols-3 sm:grid-cols-5 gap-2.5 sm:gap-4">
+                        <button v-for="y in group" :key="y" 
+                                @click="playSound(y)"
+                                class="py-3 sm:py-4 rounded-xl border bg-slate-50 text-slate-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-all font-bold text-lg sm:text-xl pinyin-display shadow-sm active:scale-90">
+                            {{ y }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div v-if="devMode" class="dev-panel">
+            <div class="sticky top-0 bg-[#0f172a] pb-4 mb-4 border-b border-slate-700">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-orange-400 font-bold text-sm">基礎元素錄音標記助手</h2>
+                    <div class="space-x-2">
+                        <button @click="startRecordingList" class="bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded text-xs font-bold transition-colors">1. 生成清單</button>
+                        <button @click="exportData" class="bg-green-600 hover:bg-green-500 px-3 py-1 rounded text-xs font-bold transition-colors">2. 複製數據</button>
+                    </div>
+                </div>
+                <div v-if="devMarkers.length > 0" class="bg-slate-800 p-3 rounded-lg border border-orange-500/50">
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <p class="text-orange-400 text-[10px] font-bold mb-1 uppercase">當前元素：</p>
+                            <p class="text-4xl font-bold text-white pinyin-display">{{ devMarkers[currentMarkerIndex]?.id }}</p>
+                        </div>
+                        <div class="text-right text-xs">
+                            <p class="text-slate-400">下一個：{{ devMarkers[currentMarkerIndex + 1]?.id || '無' }}</p>
+                            <p class="text-slate-500 mt-1">進度：{{ currentMarkerIndex + 1 }} / {{ devMarkers.length }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-6 sm:grid-cols-8 gap-1 text-[10px]">
+                <div v-for="(m, i) in devMarkers" :key="i" :id="'marker-' + i" class="p-1 border border-slate-700 rounded transition-all text-center" :class="{'marker-active': currentMarkerIndex === i, 'marker-done': i < currentMarkerIndex}">
+                    <span class="block opacity-40">#{{ i + 1 }}</span>
+                    <span class="text-xs font-bold pinyin-display">{{ m.id }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                const audioPlayer = ref(null);
+                const currentTab = ref('initial'); 
+                const isFullPlaying = ref(false);
+                
+                // 🔗【第二階段預留：在此粘貼您的網頁基礎鏈接】
+                const githubBaseUrl = ref('https://yourusername.github.io/your-repository-name/');
+                const currentIframeUrl = ref('');
+                
+                const devMode = ref(false);
+                const devMarkers = ref([]);
+                const currentMarkerIndex = ref(0);
+                
+                const timelineData = ref({
+                    "b": { "start": 0, "end": 3.401 }, "p": { "start": 3.401, "end": 4.993 }, "m": { "start": 4.993, "end": 6.818 }, "f": { "start": 6.818, "end": 8.883 }, "d": { "start": 8.883, "end": 11.252 }, "t": { "start": 11.252, "end": 13.501 }, "n": { "start": 13.501, "end": 15.509 }, "l": { "start": 15.509, "end": 17.703 }, "g": { "start": 17.703, "end": 20.175 }, "k": { "start": 20.175, "end": 22.352 }, "h": { "start": 22.352, "end": 24.376 }, "j": { "start": 24.376, "end": 26.985 }, "q": { "start": 26.985, "end": 28.822 }, "x": { "start": 28.822, "end": 31.099 }, "zh": { "start": 31.099, "end": 33.891 }, "ch": { "start": 33.891, "end": 35.852 }, "sh": { "start": 35.852, "end": 38.112 }, "r": { "start": 38.112, "end": 39.998 }, "z": { "start": 39.998, "end": 42.2 }, "c": { "start": 42.2, "end": 44.375 }, "s": { "start": 44.375, "end": 46.335 }, "y": { "start": 46.335, "end": 48.962 }, "w": { "start": 48.962, "end": 50.906 },
+                    "a": { "start": 50.906, "end": 54.548 }, "o": { "start": 54.548, "end": 56.813 }, "e": { "start": 56.813, "end": 59.612 }, "i": { "start": 59.612, "end": 61.558 }, "u": { "start": 61.558, "end": 64.23 }, "ü": { "start": 64.23, "end": 66.223 }, "er": { "start": 66.223, "end": 68.697 }, "ai": { "start": 68.697, "end": 71.843 }, "ei": { "start": 71.843, "end": 74.142 }, "ao": { "start": 74.142, "end": 76.757 }, "ou": { "start": 76.757, "end": 79.653 }, "ia": { "start": 79.653, "end": 82.086 }, "ie": { "start": 82.086, "end": 84.279 }, "iao": { "start": 84.279, "end": 87.288 }, "iu": { "start": 87.288, "end": 90.169 }, "ua": { "start": 90.169, "end": 92.706 }, "uo": { "start": 92.706, "end": 94.723 }, "uai": { "start": 94.723, "end": 97.984 }, "ui": { "start": 97.984, "end": 100.045 }, "üe": { "start": 100.045, "end": 103.495 }, "an": { "start": 103.495, "end": 107.592 }, "en": { "start": 107.592, "end": 109.577 }, "in": { "start": 109.577, "end": 111.945 }, "un": { "start": 111.945, "end": 114.283 }, "ün": { "start": 114.283, "end": 116.61 }, "ian": { "start": 116.61, "end": 119.036 }, "uan": { "start": 119.036, "end": 121.559 }, "üan": { "start": 121.559, "end": 124.478 }, "ang": { "start": 124.478, "end": 128.929 }, "eng": { "start": 128.929, "end": 130.761 }, "ing": { "start": 130.761, "end": 133.315 }, "ong": { "start": 133.315, "end": 135.825 }, "iang": { "start": 135.825, "end": 138.551 }, "iong": { "start": 138.551, "end": 140.629 }, "uang": { "start": 140.629, "end": 143.095 }, "ueng": { "start": 143.095, "end": 148.244 }
+                }); 
+
+                const initialsData = {
+                    "唇音": ["b", "p", "m", "f"], "舌尖音": ["d", "t", "n", "l"],
+                    "舌根音": ["g", "k", "h"], "舌面音": ["j", "q", "x"],
+                    "翹舌音": ["zh", "ch", "sh", "r"], "平舌音": ["z", "c", "s"], "其他": ["y", "w"]
+                };
+
+                const finalsData = {
+                    "單韻母及特殊": ["a", "o", "e", "i", "u", "ü",  "er"],
+                    "複韻母":[ "ai", "ei", "ao", "ou", "ia", "ie", "iao", "iu", "ua", "uo", "uai", "ui", "üe" ],
+                    "前鼻韻母": ["an", "en", "in", "un", "ün", "ian", "uan", "üan"],
+                    "後鼻韻母": ["ang", "eng", "ing", "ong", "iang", "iong", "uang","ueng"]
+                };
+
+                let currentAudioTrackListener = null;
+
+                const playSound = (key) => {
+                    const data = timelineData.value[key];
+                    if (data && audioPlayer.value) {
+                        if (isFullPlaying.value) {
+                            audioPlayer.value.pause();
+                            isFullPlaying.value = false;
+                        }
+                        if (currentAudioTrackListener) {
+                            audioPlayer.value.removeEventListener('timeupdate', currentAudioTrackListener);
+                        }
+
+                        audioPlayer.value.currentTime = data.start;
+                        audioPlayer.value.play().catch(err => console.log("音頻播放需要用戶手勢觸發", err));
+
+                        const checkEnd = () => {
+                            if (audioPlayer.value.currentTime >= data.end) {
+                                audioPlayer.value.pause();
+                                audioPlayer.value.removeEventListener('timeupdate', checkEnd);
+                                currentAudioTrackListener = null;
+                            }
+                        };
+                        
+                        currentAudioTrackListener = checkEnd;
+                        audioPlayer.value.addEventListener('timeupdate', checkEnd);
+                    }
+                };
+
+                const toggleFullAudio = () => {
+                    if (!audioPlayer.value) return;
+                    if (currentAudioTrackListener) {
+                        audioPlayer.value.removeEventListener('timeupdate', currentAudioTrackListener);
+                        currentAudioTrackListener = null;
+                    }
+
+                    if (isFullPlaying.value) {
+                        audioPlayer.value.pause();
+                        isFullPlaying.value = false;
+                    } else {
+                        if (audioPlayer.value.ended || audioPlayer.value.currentTime >= audioPlayer.value.duration) {
+                            audioPlayer.value.currentTime = 0;
+                        }
+                        audioPlayer.value.play().catch(err => console.log("音頻播放需要用戶手勢觸發", err));
+                        isFullPlaying.value = true;
+                    }
+                };
+
+                const goToCombination = (group) => {
+                    currentTab.value = group;
+                    currentIframeUrl.value = `${githubBaseUrl.value}${group}.html`;
+                };
+
+                const startRecordingList = () => {
+                    const list = [];
+                    Object.values(initialsData).flat().forEach(s => { list.push({ id: s, start: 0, end: 0 }); });
+                    Object.values(finalsData).flat().forEach(y => { list.push({ id: y, start: 0, end: 0 }); });
+                    devMarkers.value = list;
+                    currentMarkerIndex.value = 0;
+                    alert(`基礎清單已生成！共 ${list.length} 個基礎發音。`);
+                };
+
+                const exportData = () => {
+                    const result = {};
+                    devMarkers.value.forEach(m => {
+                        if(m.end > 0) result[m.id] = { start: Number(m.start.toFixed(3)), end: Number(m.end.toFixed(3)) };
+                    });
+                    navigator.clipboard.writeText(JSON.stringify(result, null, 2)).then(() => {
+                        alert("✅ 數據已複製！");
+                    });
+                };
+
+                onMounted(() => {
+                    if (audioPlayer.value) {
+                        audioPlayer.value.addEventListener('ended', () => {
+                            isFullPlaying.value = false;
+                        });
+                    }
+
+                    window.addEventListener('keydown', (e) => {
+                        if (e.ctrlKey && e.key === 'm') devMode.value = !devMode.value;
+                        if (e.code === 'Space' && devMode.value) {
+                            e.preventDefault();
+                            const now = audioPlayer.value.currentTime;
+                            if (devMarkers.value[currentMarkerIndex.value]) {
+                                devMarkers.value[currentMarkerIndex.value].end = now;
+                                if (devMarkers.value[currentMarkerIndex.value + 1]) {
+                                    devMarkers.value[currentMarkerIndex.value + 1].start = now;
+                                    currentMarkerIndex.value++;
+                                    nextTick(() => {
+                                        const el = document.getElementById('marker-' + currentMarkerIndex.value);
+                                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    });
+                                } else {
+                                    alert("所有基礎元素標記完畢！");
+                                }
+                            }
+                        }
+                    });
+                });
+
+                return {
+                    audioPlayer, currentTab, initialsData, finalsData, playSound, toggleFullAudio, isFullPlaying,
+                    goToCombination, currentIframeUrl, githubBaseUrl,
+                    devMode, devMarkers, currentMarkerIndex, startRecordingList, exportData
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
