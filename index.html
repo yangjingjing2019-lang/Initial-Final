@@ -13,9 +13,6 @@
         .dev-panel { position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; color: white; padding: 20px; z-index: 1000; max-height: 40vh; overflow-y: auto; font-family: monospace; border-top: 4px solid #f59e0b; box-shadow: 0 -10px 25px rgba(0,0,0,0.3); }
         .marker-active { background: #f59e0b !important; color: #000 !important; font-weight: bold; border-color: white !important; transform: scale(1.05); }
         .marker-done { opacity: 0.4; background: #334155; }
-        /* 強化行動端 iframe 的適應性 */
-        .iframe-container { width: 100%; height: 75vh; min-height: 500px; max-height: 750px; border: none; border-radius: 16px; overflow: hidden; }
-        /* 移除手機端點擊高亮藍色陰影 */
         button, div { -webkit-tap-highlight-color: transparent; }
     </style>
 </head>
@@ -50,22 +47,18 @@
 
             <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
                 <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2 text-center">
-                    <button @click="goToCombination('bpmf')" :class="currentTab === 'bpmf' ? 'bg-orange-500 text-white font-bold shadow' : 'bg-slate-50 text-slate-600'" class="py-2 text-xs sm:text-sm font-semibold rounded-lg hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">bpmf 拼讀</button>
-                    <button @click="goToCombination('dtnl')" :class="currentTab === 'dtnl' ? 'bg-orange-500 text-white font-bold shadow' : 'bg-slate-50 text-slate-600'" class="py-2 text-xs sm:text-sm font-semibold rounded-lg hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">dtnl 拼讀</button>
-                    <button @click="goToCombination('gkh')" :class="currentTab === 'gkh' ? 'bg-orange-500 text-white font-bold shadow' : 'bg-slate-50 text-slate-600'" class="py-2 text-xs sm:text-sm font-semibold rounded-lg hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">gkh 拼讀</button>
-                    <button @click="goToCombination('jqx')" :class="currentTab === 'jqx' ? 'bg-orange-500 text-white font-bold shadow' : 'bg-slate-50 text-slate-600'" class="py-2 text-xs sm:text-sm font-semibold rounded-lg hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">jqx 拼讀</button>
-                    <button @click="goToCombination('zhchshr')" :class="currentTab === 'zhchshr' ? 'bg-orange-500 text-white font-bold shadow' : 'bg-slate-50 text-slate-600'" class="py-2 text-xs sm:text-sm font-semibold rounded-lg hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">翹舌音拼讀</button>
-                    <button @click="goToCombination('zcs')" :class="currentTab === 'zcs' ? 'bg-orange-500 text-white font-bold shadow' : 'bg-slate-50 text-slate-600'" class="py-2 text-xs sm:text-sm font-semibold rounded-lg hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">平舌音拼讀</button>
-                    <button @click="goToCombination('yw')" :class="currentTab === 'yw' ? 'bg-orange-500 text-white font-bold shadow' : 'bg-slate-50 text-slate-600'" class="py-2 text-xs sm:text-sm font-semibold rounded-lg hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">零聲母/yw</button>
+                    <button @click="goToCombination('bpmf')" class="py-2 text-xs sm:text-sm font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">bpmf 拼讀</button>
+                    <button @click="goToCombination('dtnl')" class="py-2 text-xs sm:text-sm font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">dtnl 拼讀</button>
+                    <button @click="goToCombination('gkh')" class="py-2 text-xs sm:text-sm font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">gkh 拼讀</button>
+                    <button @click="goToCombination('jqx')" class="py-2 text-xs sm:text-sm font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">jqx 拼讀</button>
+                    <button @click="goToCombination('zhchshr')" class="py-2 text-xs sm:text-sm font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">翹舌音拼讀</button>
+                    <button @click="goToCombination('zcs')" class="py-2 text-xs sm:text-sm font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">平舌音拼讀</button>
+                    <button @click="goToCombination('yw')" class="py-2 text-xs sm:text-sm font-semibold rounded-lg bg-slate-50 text-slate-600 hover:bg-orange-50 hover:text-orange-600 border border-slate-200 transition-colors active:scale-95">零聲母/yw</button>
                 </div>
             </div>
         </header>
 
         <main class="space-y-6">
-            <div v-if="['bpmf','dtnl','gkh','jqx','zhchshr','zcs','yw'].includes(currentTab)" class="neumorphic-card border border-orange-100 overflow-hidden">
-                <iframe :src="currentIframeUrl" class="iframe-container" scrolling="auto"></iframe>
-            </div>
-
             <div v-if="currentTab === 'initial'" class="neumorphic-card p-4 sm:p-6 border border-emerald-100">
                 <h2 class="text-sm sm:text-base font-bold text-emerald-700 mb-4 flex items-center">
                     <span class="mr-2">🟢</span> 點擊聲母聽發音 (共 23 個)
@@ -108,18 +101,6 @@
                         <button @click="exportData" class="bg-green-600 hover:bg-green-500 px-3 py-1 rounded text-xs font-bold transition-colors">2. 複製數據</button>
                     </div>
                 </div>
-                <div v-if="devMarkers.length > 0" class="bg-slate-800 p-3 rounded-lg border border-orange-500/50">
-                    <div class="flex justify-between items-end">
-                        <div>
-                            <p class="text-orange-400 text-[10px] font-bold mb-1 uppercase">當前元素：</p>
-                            <p class="text-4xl font-bold text-white pinyin-display">{{ devMarkers[currentMarkerIndex]?.id }}</p>
-                        </div>
-                        <div class="text-right text-xs">
-                            <p class="text-slate-400">下一個：{{ devMarkers[currentMarkerIndex + 1]?.id || '無' }}</p>
-                            <p class="text-slate-500 mt-1">進度：{{ currentMarkerIndex + 1 }} / {{ devMarkers.length }}</p>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="grid grid-cols-6 sm:grid-cols-8 gap-1 text-[10px]">
                 <div v-for="(m, i) in devMarkers" :key="i" :id="'marker-' + i" class="p-1 border border-slate-700 rounded transition-all text-center" :class="{'marker-active': currentMarkerIndex === i, 'marker-done': i < currentMarkerIndex}">
@@ -139,9 +120,15 @@
                 const currentTab = ref('initial'); 
                 const isFullPlaying = ref(false);
                 
-                // 🔗【第二階段預留：在此粘貼您的網頁基礎鏈接】
-                const githubBaseUrl = ref('https://yangjingjing2019-lang.github.io/bpmf/');
-                const currentIframeUrl = ref('');
+                const combinationUrls = {
+                    bpmf: 'https://yangjingjing2019-lang.github.io/bpmf/',
+                    dtnl: '填入dtnl網頁連結',
+                    gkh: '填入gkh網頁連結',
+                    jqx: '填入jqx網頁連結',
+                    zhchshr: '填入翹舌音拼讀網頁連結',
+                    zcs: '填入平舌音拼讀網頁連結',
+                    yw: '填入零聲母/yw拼讀網頁連結'
+                };
                 
                 const devMode = ref(false);
                 const devMarkers = ref([]);
@@ -170,17 +157,10 @@
                 const playSound = (key) => {
                     const data = timelineData.value[key];
                     if (data && audioPlayer.value) {
-                        if (isFullPlaying.value) {
-                            audioPlayer.value.pause();
-                            isFullPlaying.value = false;
-                        }
-                        if (currentAudioTrackListener) {
-                            audioPlayer.value.removeEventListener('timeupdate', currentAudioTrackListener);
-                        }
-
+                        if (isFullPlaying.value) { audioPlayer.value.pause(); isFullPlaying.value = false; }
+                        if (currentAudioTrackListener) { audioPlayer.value.removeEventListener('timeupdate', currentAudioTrackListener); }
                         audioPlayer.value.currentTime = data.start;
                         audioPlayer.value.play().catch(err => console.log("音頻播放需要用戶手勢觸發", err));
-
                         const checkEnd = () => {
                             if (audioPlayer.value.currentTime >= data.end) {
                                 audioPlayer.value.pause();
@@ -188,7 +168,6 @@
                                 currentAudioTrackListener = null;
                             }
                         };
-                        
                         currentAudioTrackListener = checkEnd;
                         audioPlayer.value.addEventListener('timeupdate', checkEnd);
                     }
@@ -196,80 +175,43 @@
 
                 const toggleFullAudio = () => {
                     if (!audioPlayer.value) return;
-                    if (currentAudioTrackListener) {
-                        audioPlayer.value.removeEventListener('timeupdate', currentAudioTrackListener);
-                        currentAudioTrackListener = null;
-                    }
-
-                    if (isFullPlaying.value) {
-                        audioPlayer.value.pause();
-                        isFullPlaying.value = false;
-                    } else {
-                        if (audioPlayer.value.ended || audioPlayer.value.currentTime >= audioPlayer.value.duration) {
-                            audioPlayer.value.currentTime = 0;
-                        }
-                        audioPlayer.value.play().catch(err => console.log("音頻播放需要用戶手勢觸發", err));
-                        isFullPlaying.value = true;
+                    if (currentAudioTrackListener) { audioPlayer.value.removeEventListener('timeupdate', currentAudioTrackListener); currentAudioTrackListener = null; }
+                    if (isFullPlaying.value) { audioPlayer.value.pause(); isFullPlaying.value = false; } 
+                    else {
+                        if (audioPlayer.value.ended || audioPlayer.value.currentTime >= audioPlayer.value.duration) audioPlayer.value.currentTime = 0;
+                        audioPlayer.value.play(); isFullPlaying.value = true;
                     }
                 };
 
                 const goToCombination = (group) => {
-                    currentTab.value = group;
-                    currentIframeUrl.value = `${githubBaseUrl.value}${group}.html`;
+                    if (combinationUrls[group]) {
+                        window.location.href = combinationUrls[group];
+                    }
                 };
 
                 const startRecordingList = () => {
                     const list = [];
                     Object.values(initialsData).flat().forEach(s => { list.push({ id: s, start: 0, end: 0 }); });
                     Object.values(finalsData).flat().forEach(y => { list.push({ id: y, start: 0, end: 0 }); });
-                    devMarkers.value = list;
-                    currentMarkerIndex.value = 0;
-                    alert(`基礎清單已生成！共 ${list.length} 個基礎發音。`);
+                    devMarkers.value = list; currentMarkerIndex.value = 0;
                 };
 
                 const exportData = () => {
                     const result = {};
-                    devMarkers.value.forEach(m => {
-                        if(m.end > 0) result[m.id] = { start: Number(m.start.toFixed(3)), end: Number(m.end.toFixed(3)) };
-                    });
-                    navigator.clipboard.writeText(JSON.stringify(result, null, 2)).then(() => {
-                        alert("✅ 數據已複製！");
-                    });
+                    devMarkers.value.forEach(m => { if(m.end > 0) result[m.id] = { start: Number(m.start.toFixed(3)), end: Number(m.end.toFixed(3)) }; });
+                    navigator.clipboard.writeText(JSON.stringify(result, null, 2)).then(() => alert("✅ 數據已複製！"));
                 };
 
                 onMounted(() => {
-                    if (audioPlayer.value) {
-                        audioPlayer.value.addEventListener('ended', () => {
-                            isFullPlaying.value = false;
-                        });
-                    }
-
+                    if (audioPlayer.value) audioPlayer.value.addEventListener('ended', () => isFullPlaying.value = false);
                     window.addEventListener('keydown', (e) => {
                         if (e.ctrlKey && e.key === 'm') devMode.value = !devMode.value;
-                        if (e.code === 'Space' && devMode.value) {
-                            e.preventDefault();
-                            const now = audioPlayer.value.currentTime;
-                            if (devMarkers.value[currentMarkerIndex.value]) {
-                                devMarkers.value[currentMarkerIndex.value].end = now;
-                                if (devMarkers.value[currentMarkerIndex.value + 1]) {
-                                    devMarkers.value[currentMarkerIndex.value + 1].start = now;
-                                    currentMarkerIndex.value++;
-                                    nextTick(() => {
-                                        const el = document.getElementById('marker-' + currentMarkerIndex.value);
-                                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                    });
-                                } else {
-                                    alert("所有基礎元素標記完畢！");
-                                }
-                            }
-                        }
                     });
                 });
 
                 return {
                     audioPlayer, currentTab, initialsData, finalsData, playSound, toggleFullAudio, isFullPlaying,
-                    goToCombination, currentIframeUrl, githubBaseUrl,
-                    devMode, devMarkers, currentMarkerIndex, startRecordingList, exportData
+                    goToCombination, devMode, devMarkers, currentMarkerIndex, startRecordingList, exportData
                 };
             }
         }).mount('#app');
