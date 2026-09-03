@@ -451,15 +451,18 @@
           "單韻母及特殊": [
             "a", "o", "e", "i", "u", "ü", "er"
           ],
+
           "複韻母": [
             "ai", "ei", "ao", "ou",
             "ia", "ie", "iao", "iu",
             "ua", "uo", "uai", "ui", "üe"
           ],
+
           "前鼻韻母": [
             "an", "en", "in", "un",
             "ün", "ian", "uan", "üan"
           ],
+
           "後鼻韻母": [
             "ang", "eng", "ing", "ong",
             "iang", "iong", "uang", "ueng"
@@ -482,6 +485,8 @@
                 'timeupdate',
                 currentAudioTrackListener
               );
+
+              currentAudioTrackListener = null;
             }
 
             audioPlayer.value.currentTime = data.start;
@@ -546,18 +551,14 @@
         };
 
         /**
-         * 拼讀網頁導航
-         * bpmf、gkh、jqx、zcs：直接進入指定網頁
-         * 其餘按鈕：顯示「即將上線」
+         * 已設定網址：直接進入網頁
+         * 尚未設定網址：顯示「即將上線」
          */
         const goToCombination = (group) => {
-          const availableGroups = ['bpmf', 'gkh', 'jqx'];
+          const targetUrl = combinationUrls[group];
 
-          if (
-            availableGroups.includes(group) &&
-            combinationUrls[group]
-          ) {
-            window.location.href = combinationUrls[group];
+          if (targetUrl) {
+            window.location.href = targetUrl;
           } else {
             showComingSoonModal.value = true;
           }
@@ -621,7 +622,10 @@
           }
 
           window.addEventListener('keydown', (event) => {
-            if (event.ctrlKey && event.key.toLowerCase() === 'm') {
+            if (
+              event.ctrlKey &&
+              event.key.toLowerCase() === 'm'
+            ) {
               devMode.value = !devMode.value;
             }
           });
